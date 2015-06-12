@@ -1,16 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<infinispan xmlns="urn:infinispan:config:7.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="urn:infinispan:config:7.2 http://infinispan.org/schemas/infinispan-config-7.2.xsd">
+<infinispan xmlns="urn:infinispan:config:6.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="urn:infinispan:config:6.0 http://infinispan.org/schemas/infinispan-config-6.0.xsd">
 
-  <jgroups>
-    <stack-file name="jgroups-configuration.xml"/>
-  </jgroups>
+  <global>
+    <transport transportClass="org.infinispan.remoting.transport.jgroups.JGroupsTransport"
+               clusterName="BenchMark-Cache"
+               distributedSyncTimeout="20000"
+               nodeName="${jboss.node.name:gtn}">
+      <properties>
+        <property name="configurationFile" value="jgroups-configuration.xml"/>
+      </properties>
+    </transport>
+  </global>
 
-  <cache-container default-cache="default">
-    <transport cluster="demoCluster"/>
-    <jmx />
-    <replicated-cache name="default" mode="SYNC" statistics="true"/>
-  </cache-container>
+  <default>
+    <clustering mode="replication">
+      <stateTransfer timeout="20000" fetchInMemoryState="false" />
+      <async />
+    </clustering>
+
+    <locking isolationLevel="READ_COMMITTED" lockAcquisitionTimeout="20000" writeSkewCheck="false" concurrencyLevel="500" useLockStriping="false"/>
+    <transaction transactionManagerLookupClass="org.infinispan.transaction.lookup.GenericTransactionManagerLookup" syncRollbackPhase="true" syncCommitPhase="true" transactionMode="TRANSACTIONAL"/>
+    <jmxStatistics enabled="true"/>
+    <eviction strategy="LIRS" threadPolicy="DEFAULT" maxEntries="1000000"/>
+    <expiration wakeUpInterval="5000"/>
+  </default>
 
 </infinispan>
